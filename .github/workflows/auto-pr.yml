@@ -1,9 +1,12 @@
 name: Auto PR from dev to main
+permissions:
+  contents: write
+  pull-requests: write
 
 on:
   push:
     branches:
-      - main
+      - dev
 
 jobs:
   create-pull-request:
@@ -16,8 +19,8 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: Create PR from dev to main
+          commit-message: Merge dev into main
           branch: dev
           base: main
-          title: 'Auto PR: Merge dev into main'
+          title: 'Update Resource Pack'
           body: 'This PR was automatically created by a GitHub Action.'
