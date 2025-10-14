@@ -17,9 +17,6 @@ jobs:
         with:
           ref: dev
 
-      - name: Set up GitHub CLI
-        uses: cli/cli@v2
-
       - name: Check if PR already exists
         id: check_pr
         run: |
