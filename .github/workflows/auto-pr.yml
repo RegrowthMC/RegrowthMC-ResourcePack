@@ -1,6 +1,6 @@
 name: Auto PR from dev to main
+
 permissions:
-  contents: write
   pull-requests: write
 
 on:
@@ -17,11 +17,30 @@ jobs:
         with:
           ref: dev
 
+      - name: Set up GitHub CLI
+        uses: cli/cli@v2
+
+      - name: Check if PR already exists
+        id: check_pr
+        run: |
+          gh auth setup-git
+          gh pr list --base main --head dev --json number --jq '.[0].number' > pr_number.txt
+          if [ -s pr_number.txt ]; then
+            echo "PR already exists."
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: dev
-          base: main
-          title: 'Update Resource Pack'
-          body: 'This PR was automatically created by a GitHub Action.'
+        if: steps.check_pr.outputs.exists == 'false'
+        run: |
+          gh pr create \
+            --base main \
+            --head dev \
+            --title "Update Resource Pack" \
+            --body "This PR was automatically created by a GitHub Action."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
