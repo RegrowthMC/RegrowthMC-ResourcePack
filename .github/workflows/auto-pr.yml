@@ -17,15 +17,22 @@ jobs:
         with:
           ref: dev
 
-      - name: Check if PR already exists
+      - name: Check if open PR already exists
         id: check_pr
         run: |
           gh auth setup-git
-          gh pr list --base main --head dev --json number --jq '.[0].number' > pr_number.txt
-          if [ -s pr_number.txt ]; then
-            echo "PR already exists."
+          pr_number=$(gh pr list \
+            --base main \
+            --head dev \
+            --state open \
+            --json number \
+            --jq '.[0].number')
+
+          if [ -n "$pr_number" ]; then
+            echo "Open PR already exists: #$pr_number"
             echo "exists=true" >> $GITHUB_OUTPUT
           else
+            echo "No open PR found."
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
         env:
